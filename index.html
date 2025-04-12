@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Verification System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.ethers.io/lib/ethers-5.0.umd.min.js"></script>
+</head>
+<body class="bg-gray-100 font-[Inter]">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-3xl font-bold text-gray-800 mb-4">Blockchain Document Verification System</h1>
+            <p class="text-gray-600">Secure • Immutable • Verifiable</p>
+        </div>
+
+        <!-- Admin Section -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Admin Dashboard</h2>
+            <form id="uploadForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Admin Name</label>
+                    <input type="text" id="adminName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Document Upload</label>
+                    <input type="file" id="documentFile" class="mt-1 block w-full" required accept="image/*,.pdf">
+                </div>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+                    Upload & Verify Document
+                </button>
+            </form>
+            <div id="uploadResult" class="mt-4 hidden p-4 rounded-md"></div>
+        </div>
+
+        <!-- Student Verification Section -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">Document Verification</h2>
+            <form id="verifyForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Document ID</label>
+                    <input type="text" id="docId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border" required>
+                </div>
+                <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition">
+                    Verify Document
+                </button>
+            </form>
+            <div id="verifyResult" class="mt-4 hidden p-4 rounded-md"></div>
+        </div>
+    </div>
+
+    <script>
+        // Mock blockchain connection (In production, use actual Web3/Ethers connection)
+        const mockBlockchain = {
+            documents: new Map(),
+            addDocument(docId, name, hash) {
+                this.documents.set(docId, {
+                    name,
+                    hash,
+                    verified: true,
+                    timestamp: new Date().toISOString()
+                });
+                return true;
+            },
+            verifyDocument(docId) {
+                return this.documents.get(docId) || null;
+            }
+        };
+
+        // Handle document upload
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const resultDiv = document.getElementById('uploadResult');
+            resultDiv.className = 'mt-4 p-4 rounded-md';
+            
+            try {
+                const adminName = document.getElementById('adminName').value;
+                const file = document.getElementById('documentFile').files[0];
+                
+                // Mock AI verification (In production, this would call the backend)
+                const mockAiVerification = Math.random() > 0.2;
+                const docId = `DOC${Date.now()}`;
+                
+                if (mockAiVerification) {
+                    mockBlockchain.addDocument(docId, adminName, 'mock_hash');
+                    resultDiv.className += ' bg-green-100 text-green-700';
+                    resultDiv.innerHTML = `
+                        <p><strong>Document Verified Successfully!</strong></p>
+                        <p>Document ID: ${docId}</p>
+                        <p>Confidence Score: ${(Math.random() * 20 + 80).toFixed(2)}%</p>
+                    `;
+                } else {
+                    resultDiv.className += ' bg-red-100 text-red-700';
+                    resultDiv.innerHTML = `
+                        <p><strong>Document Verification Failed!</strong></p>
+                        <p>The document appears to be potentially fraudulent.</p>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.className += ' bg-red-100 text-red-700';
+                resultDiv.innerHTML = `<p>Error: ${error.message}</p>`;
+            }
+            resultDiv.classList.remove('hidden');
+        });
+
+        // Handle document verification
+        document.getElementById('verifyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const resultDiv = document.getElementById('verifyResult');
+            resultDiv.className = 'mt-4 p-4 rounded-md';
+            
+            try {
+                const docId = document.getElementById('docId').value;
+                const doc = mockBlockchain.verifyDocument(docId);
+                
+                if (doc) {
+                    resultDiv.className += ' bg-green-100 text-green-700';
+                    resultDiv.innerHTML = `
+                        <p><strong>Document Verified!</strong></p>
+                        <p>Name: ${doc.name}</p>
+                        <p>Timestamp: ${doc.timestamp}</p>
+                        <p>Status: ${doc.verified ? 'Verified' : 'Unverified'}</p>
+                    `;
+                } else {
+                    resultDiv.className += ' bg-yellow-100 text-yellow-700';
+                    resultDiv.innerHTML = `
+                        <p><strong>Document Not Found</strong></p>
+                        <p>No document exists with the provided ID.</p>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.className += ' bg-red-100 text-red-700';
+                resultDiv.innerHTML = `<p>Error: ${error.message}</p>`;
+            }
+            resultDiv.classList.remove('hidden');
+        });
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
